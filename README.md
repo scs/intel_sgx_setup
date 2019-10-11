@@ -8,8 +8,8 @@ A computer with Intel SGX support is needed.
 [This repository](https://github.com/ayeks/SGX-hardware) lists some of the computers that support Intel SGX.
 
 We have the following systems up and running:
-* [Intel NUC NUC8i3BEH2](https://ark.intel.com/content/www/us/en/ark/products/126150/intel-nuc-kit-nuc8i3beh.html)
-* [Dell PowerEdge R340 Rack Server](https://www.dell.com/en-us/work/shop/povw/poweredge-r340) with an Intel Xeon E-2176G, 3.7GHZ processor
+* [Intel NUC NUC8i3BEH2](https://ark.intel.com/content/www/us/en/ark/products/126150/intel-nuc-kit-nuc8i3beh.html) (not suitable for production mode!)
+* [Dell PowerEdge R340 Rack Server](https://www.dell.com/en-us/work/shop/povw/poweredge-r340) with an Intel Xeon E-2176G, 3.7GHZ processor (suitable for production mode with commercial license)
 
 **IMPORTANT** The CPU of the PowerEdge R340 is essential! There are cheaper versions availabe, but they don't support all features of Intel SGX.
 
