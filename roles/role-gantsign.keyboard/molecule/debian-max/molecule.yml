@@ -1,0 +1,29 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+lint:
+  name: yamllint
+
+platforms:
+  - name: ansible-role-keyboard-debian-max
+    image: debian:9
+
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ../default/playbook.yml
+  lint:
+    name: ansible-lint
+
+scenario:
+  name: debian-max
+
+verifier:
+  name: testinfra
+  directory: ../default/tests
+  lint:
+    name: flake8

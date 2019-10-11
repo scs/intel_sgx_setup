@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: John Freeman
+  description: Role for configuring keyboard layout etc.
+  company: GantSign Ltd.
+  license: MIT
+  min_ansible_version: 2.4
+  platforms:
+    - name: Ubuntu
+      versions:
+        - trusty
+        - xenial
+        - bionic
+    - name: Debian
+      versions:
+        - stretch
+        - jessie
+  galaxy_tags:
+    - keyboard
+    - ubuntu
+    - system
+dependencies: []

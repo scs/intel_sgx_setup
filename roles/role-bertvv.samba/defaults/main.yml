@@ -1,0 +1,33 @@
+# roles/samba/defaults/main.yml
+---
+
+samba_workgroup: 'WORKGROUP'
+samba_server_string: '%h server (Samba, Ubuntu)'
+samba_dns_proxy: 'no'
+
+samba_log: '/var/log/samba/log.%m'
+samba_log_size: 1000
+samba_log_level: 0
+samba_logging: 'syslog@1 /var/log/samba/log.%m'
+samba_panic_action: '/usr/share/samba/panic-action %d'
+
+samba_server_role: 'standalone server'
+samba_obey_pam_restrictions: 'yes'
+samba_pam_password_change: 'yes'
+
+samba_interfaces: []
+samba_security: 'user'
+samba_passdb_backend: 'tdbsam'
+samba_map_to_guest: 'bad user'
+samba_usershare_allow_guests: 'yes'
+
+samba_load_homes: true
+samba_create_varwww_symlinks: false
+samba_shares_root: '/srv/shares'
+samba_shares: []
+samba_users: "{{ users }}"
+
+
+samba_mitigate_cve_2017_7494: false
+samba_user_password_filename: 'samba-temp-password.txt'
+samba_profiled_filename: 'samba-password-change-notif.sh'

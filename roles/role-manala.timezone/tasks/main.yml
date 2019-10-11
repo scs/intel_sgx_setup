@@ -1,0 +1,12 @@
+---
+
+# Default
+- import_tasks: default.yml
+  tags:
+    - manala_timezone
+
+# the following was NOT initialy part of the role.
+# However, according to Ansible Documentation, all handlers triggered by roles
+# are triggered only after execution of ALL roles.
+- name: Force handlers to run before continuing
+  meta: flush_handlers

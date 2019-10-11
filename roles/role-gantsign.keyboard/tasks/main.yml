@@ -1,0 +1,19 @@
+---
+- name: Install keyboard-configuration
+  become: yes
+  apt:
+    name: keyboard-configuration
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Write keyboard configuration
+  become: yes
+  template:
+    src: keyboards.j2
+    dest: /etc/default/keyboard
+    force: yes
+    owner: root
+    group: root
+    mode: 'u=rw,go=r'
+  notify:
+    - dpkg-reconfigure keyboard-configuration

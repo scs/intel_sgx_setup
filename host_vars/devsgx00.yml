@@ -1,0 +1,19 @@
+---
+ansible_user: <USER_WITH_SUDO_PERMISSION>
+ansible_host: <HOSTNAME>
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+ansible_python_interpreter: "/usr/bin/python3"
+
+# netplan configuration, used by role-mrlesmithjr.netplan
+# the main modification is to make sure ubuntu sends the mac address to the dhcp server, in order to
+# get the static IP
+netplan_configuration:
+    network:
+      version: 2
+      ethernets:
+        eno1:
+          dhcp4: true
+          dhcp-identifier: mac
+        eno2:
+          dhcp4: true
+          dhcp-identifier: mac

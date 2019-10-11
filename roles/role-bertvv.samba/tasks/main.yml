@@ -1,0 +1,188 @@
+# File: roles/samba/tasks/main.yml
+---
+
+- name: Include OS specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "os_{{ ansible_distribution }}.yml"
+    - "os_{{ ansible_os_family }}.yml"
+  tags: samba
+
+- name: Install Samba packages
+  package:
+    name: "{{ samba_packages }}"
+    state: present
+  tags: samba
+
+- name: Install Samba VFS extensions packages
+  package:
+    name: "{{ samba_vfs_packages }}"
+    state: present
+  when: samba_vfs_packages is defined
+  tags: samba
+
+- name: Register Samba version
+  shell: "smbd --version | sed 's/Version //'"
+  register: samba_version
+  changed_when: false
+  tags: samba
+
+- name: Install SELinux package
+  package:
+    name: "{{ samba_selinux_packages }}"
+    state: present
+  when: ansible_selinux is defined and ansible_selinux.status == 'enabled'
+  tags: samba
+
+- name: Make sure SELinux boolean settings are correct
+  seboolean:
+    name: "{{ item }}"
+    state: true
+    persistent: true
+  with_items: "{{ samba_selinux_booleans }}"
+  when: ansible_selinux is defined and ansible_selinux.status == 'enabled'
+  tags: samba
+
+- name: Create Samba shares root directory
+  file:
+    state: directory
+    path: "{{ samba_shares_root }}"
+    owner: root
+    group: root
+    mode: '0755'
+  when: samba_shares|length > 0
+  tags: samba
+
+- name: Create share directories
+  with_items: "{{ samba_shares }}"
+  file:
+    state: directory
+    path: "{{ item.path|default([samba_shares_root,item.name]|join('/')) }}"
+    owner: "{{ item.owner|default('root') }}"
+    group: "{{ item.group|default('users') }}"
+    mode: "{{ item.directory_mode|default('0775') }}"
+    setype: "{{ item.setype|default('samba_share_t') }}"
+  tags: samba
+
+- name: Ensure webserver document root exists
+  file:
+    name: "{{ samba_www_documentroot }}"
+    state: directory
+  when: samba_create_varwww_symlinks|bool
+  tags: samba
+
+- name: Create link to shares in webserver document root
+  file:
+    state: link
+    path: "{{ samba_www_documentroot }}/{{ item.name }}"
+    src: "{{ item.path|default([samba_shares_root,item.name]|join('/')) }}"
+  with_items: "{{ samba_shares }}"
+  when: samba_create_varwww_symlinks|bool
+  tags: samba
+
+- name: Samba configuration
+  template:
+    dest: "{{ samba_configuration }}"
+    src: modified_smb.conf.j2
+    validate: 'testparm -s %s'
+    backup: yes
+  notify:
+    - Restart Samba services
+  tags: samba
+
+- name: Install global include file
+  template:
+    src: "{{ samba_global_include }}"
+    dest: "{{ samba_configuration_dir }}"
+    validate: 'testparm -s %s'
+  when: samba_global_include is defined
+  notify:
+    - Restart Samba services
+  tags: samba
+
+- name: Install home include file
+  template:
+    src: "{{ samba_homes_include }}"
+    dest: "{{ samba_configuration_dir }}"
+    validate: 'testparm -s %s'
+  when: samba_homes_include is defined
+  notify:
+    - Restart Samba services
+  tags: samba
+
+- name: Install share specific include files
+  template:
+    src: "{{ item.include_file }}"
+    dest: "{{ samba_configuration_dir }}"
+    validate: 'testparm -s %s'
+  when: item.include_file is defined
+  notify:
+    - Restart Samba services
+  with_items: "{{ samba_shares }}"
+  tags: samba
+
+- name: Create username map file if needed
+  template:
+    dest: "{{ samba_username_map_file }}"
+    src: smbusers.j2
+  notify:
+    - Restart Samba services
+  when: samba_username_map is defined
+  tags: samba
+
+- name: Start Samba service(s)
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items: "{{ samba_services }}"
+  tags: samba
+
+- name: Listing samba users
+  shell: pdbedit -L
+  register: username_output
+  no_log: true
+  changed_when: False
+
+- name: For non-existing samba users generate a file with a random password
+  template:
+    src: samba_temp_password.j2
+    dest: "/home/{{item.username}}/{{ samba_user_password_filename }}"
+    mode: '0600'
+    owner: "{{item.username}}"
+    group: "{{item.username}}"
+    force: yes
+  loop: "{{ samba_users }}"
+  when: "item['username'] not in username_output.stdout"
+
+- name: Retrieve random password
+  slurp:
+    src: "/home/{{item.username}}/samba-temp-password.txt"
+  register: samba_list_includes_new_user_passwords
+  loop: "{{ samba_users }}"
+  when: "item['username'] not in username_output.stdout"
+
+- name: Create Samba users if they don't exist yet
+  vars:
+    samba_new_user_password: "{{samba_list_includes_new_user_passwords['results'][my_idx]['content'] | b64decode | trim }}"
+  shell: >
+    (echo {{ samba_new_user_password }}; echo {{ samba_new_user_password }}) \
+    | sudo smbpasswd -s -a {{ item.username }}
+  register: create_user_output
+  changed_when: "'Added user' in create_user_output.stdout"
+  tags: samba
+  loop: "{{ samba_users }}"
+  loop_control:
+    index_var: my_idx
+  when: "item['username'] not in username_output.stdout"
+  notify:
+    - Restart Samba services
+
+- name: Make sure that users are informed about the password changes
+  template:
+    src: samba_motd.j2
+    dest: "/etc/profile.d/{{ samba_profiled_filename }}"
+    mode: '0755'
+    owner: root
+    group: root
+    force: yes

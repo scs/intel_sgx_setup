@@ -1,0 +1,60 @@
+---
+- hosts: developmentServersSGX
+  vars_prompt:
+    - name: "ansible_sudo_pass"
+      prompt: "Sudo password"
+      private: yes
+
+  pre_tasks:
+    - name: Ping remote servers
+      ping:
+
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        force_apt_get: True
+      become: yes
+
+    - name: "Update and upgrade apt packages"
+      become: yes
+      apt:
+        upgrade: 'yes'
+        update_cache: yes
+        cache_valid_time: 3600 #one day
+
+    - name: Reboot system if required
+      shell: 'sleep 5 && shutdown -r now "Rebooting to complete system upgrade" && sleep 5'
+      args:
+        removes: /var/run/reboot-required
+      register: rebooting_start
+      become: yes
+
+    - name: Wait for system to become reachable again if rebooted
+      wait_for_connection:
+        delay: 400
+        timeout: 800
+      when: rebooting_start is changed
+
+  roles:
+    - { role: role-mrlesmithjr.netplan, become: yes }
+    - { role: role-gantsign.keyboard, become: yes }
+    - { role: role-manala.timezone, become: yes }
+    - { role: role-singleplatform-eng.users, become: yes }
+    - { role: role-install-tools, become: yes }
+    - { role: role-andrewrothstein.gcc-toolbox, become: yes }
+    - { role: role-intel-sgx, become: yes }
+    - { role: role-bertvv.samba, become: yes}
+
+  post_tasks:
+    - name: Reboot system if required - END of playbook
+      shell: 'sleep 5 && shutdown -r now "Rebooting to complete system upgrade" && sleep 5'
+      args:
+        removes: /var/run/reboot-required
+      register: rebooting_end
+      become: yes
+
+    - name: Wait for system to become reachable again if rebooted
+      wait_for_connection:
+        delay: 400
+        timeout: 800
+      when: rebooting_end is changed

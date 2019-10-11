@@ -1,0 +1,10 @@
+#!/bin/sh
+export TERM=xterm-256color
+THIS_USER=$(whoami)
+SAMBA_PASS_FILENAME={{samba_user_password_filename}}
+if [ -f /home/$THIS_USER/$SAMBA_PASS_FILENAME ]; then
+  echo "$(tput setaf 4) A temporary password has been created for your Samba account. You can find it inside $SAMBA_PASS_FILENAME located under your home folder "
+  echo "$(tput setaf 4) Please use it to change your password on your samba account. To do so, run: smbpasswd "
+  echo "$(tput setaf 4) To remove this message, please delete the file $SAMBA_PASS_FILENAME AFTER changing your samba password. " 
+
+fi

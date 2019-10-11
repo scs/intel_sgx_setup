@@ -1,0 +1,71 @@
+---
+# tasks file for role-install-tools
+- name: Install git
+  apt:
+    name: git
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install nano editor
+  apt:
+    name: nano
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install tmux
+  apt:
+    name: tmux
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install zsh
+  apt:
+    name: zsh
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install cmake
+  apt:
+    name: cmake
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install pkg-config
+  apt:
+    name: pkg-config
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install libssl-dev
+  apt:
+    name: libssl-dev
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install clang
+  apt:
+    name: clang
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install libclang-dev
+  apt:
+    name: libclang-dev
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour
+
+- name: Install llvm
+  apt:
+    name: llvm
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 #one hour

@@ -1,0 +1,20 @@
+---
+
+dependencies: []
+
+galaxy_info:
+
+  author:              Manala
+  company:             Manala
+  description:         Handle timezone
+  license:             MIT
+  min_ansible_version: 2.4.0
+  platforms:
+    - name: Debian
+      versions:
+        - wheezy
+        - jessie
+        - stretch
+  galaxy_tags:
+    - system
+    - timezone

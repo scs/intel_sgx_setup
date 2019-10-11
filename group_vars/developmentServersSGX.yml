@@ -1,0 +1,24 @@
+---
+ansible_domain: "<DOMAIN>"
+
+# the following variable defines the users to be created, used by role-singleplatform-eng.users
+users:
+  - username: <dummy>
+    name: <Dummy User>
+    ssh_key:
+      - "{{ lookup('file', 'files/users/keys/<DUMMY>.pub') }}"
+
+# the following variables refer to role-intel-sgx
+intel_sgx_umbrella_directory: "/opt/intel"
+
+intel_sgx_git_DRIVER_version_tag: "sgx_driver_2.5"
+# Note: the sgx_driver_2.1 seems to have an issue with the compiler -- building fails
+
+intel_sgx_DRIVER_directory: "linux-{{ intel_sgx_git_DRIVER_version_tag }}"
+intel_sgx_driver_installed_version_filename: "installed-intel-sgx-driver-version.txt"
+
+# intel_sgx_git_SDK_PWD_version_tag: "sgx_2.5"
+intel_sgx_git_SDK_PWD_version_tag: "sgx_2.6"
+
+intel_sgx_SDK_PWD_directory: "linux-{{ intel_sgx_git_SDK_PWD_version_tag }}"
+intel_sgx_sdk_psw_linked_version_filename: "linked-sgx-sdk-version.txt"
